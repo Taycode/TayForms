@@ -32,4 +32,5 @@ class Answer(models.Model):
 	"""Answer"""
 	response = models.ForeignKey(Response, on_delete=models.CASCADE)
 	answer = models.CharField(max_length=255)
+	question = models.ForeignKey(Question, on_delete=models.CASCADE)
 

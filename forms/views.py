@@ -6,9 +6,13 @@ from rest_framework.generics import (
 	RetrieveAPIView
 )
 from .serializers import (
-	CreateFormSerializer
+	CreateFormSerializer,
+	CreateResponseSerializer,
+	FormModelSerializer,
+	QuestionModelSerializer,
+	AnswerModelSerializer
 )
-from .models import Form, Question
+from .models import Form, Question, Response, Answer
 
 from rest_framework import serializers
 
@@ -30,6 +34,8 @@ class ListFormAPIView(ListAPIView):
 			"""Meta Class"""
 			model = Form
 			fields = '__all__'
+			ref_name = 'list_form_api_view'
+
 	serializer_class = OutputSerializer
 	queryset = Form.objects.all()
 
@@ -54,6 +60,57 @@ class RetrieveFormAPIView(RetrieveAPIView):
 			"""Meta Class"""
 			model = Form
 			fields = ('id', 'title', 'description', 'questions', 'user', )
+			ref_name = 'retrieve_form_api_view'
 
 	serializer_class = OutputSerializer
 	queryset = Form.objects.all()
+
+
+class CreateResponseAPIView(CreateAPIView):
+	"""Creates Response"""
+	serializer_class = CreateResponseSerializer
+
+	def perform_create(self, serializer):
+		"""Perform Create process"""
+		form = Form.objects.get(id=self.kwargs.get('pk'))
+		serializer.save(form=form)
+
+	def get_queryset(self):
+		"""Filter Query set"""
+		return Response.objects.filter(form_id=self.kwargs.get('pk'))
+
+
+class ListResponseAPIView(ListAPIView):
+	"""Lists Responses"""
+
+	class OutputSerializer(serializers.ModelSerializer):
+		"""Output Serializer"""
+		class Meta:
+			"""Meta Class"""
+			model = Response
+			fields = '__all__'
+			ref_name = 'list_response_api_view'
+
+	serializer_class = OutputSerializer
+
+	def get_queryset(self):
+		"""Filter Query set"""
+		return Response.objects.filter(form_id=self.kwargs.get('pk'))
+
+
+class RetrieveResponseAPIView(RetrieveAPIView):
+	"""Retrieves Response"""
+
+	class OutputSerializer(serializers.ModelSerializer):
+		"""Output Serializer"""
+		form = FormModelSerializer()
+		answers = AnswerModelSerializer(many=True, source='answer_set')
+
+		class Meta:
+			"""Meta Class"""
+			model = Response
+			fields = ('form', 'created_at', 'answers', )
+			ref_name = 'retrieve_response_api_view'
+
+	serializer_class = OutputSerializer
+	queryset = Response.objects.all()
