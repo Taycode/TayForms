@@ -40,5 +40,7 @@ urlpatterns = [
 
     # Other Paths
     path('admin/', admin.site.urls),
-    path('users/', include('users.urls'))
+    path('users/', include('users.urls')),
+    path('forms/', include('forms.urls'))
 ]
+
